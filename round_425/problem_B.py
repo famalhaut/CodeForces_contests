@@ -1,58 +1,45 @@
 import sys
+
 sys.stdin = open('test.txt', 'r')
 
 good = set(input())
-
-bad = set()
-for i in range(97, 97 + 26):
-    bad.add(chr(i))
-bad = bad - good
+bad = set(chr(i) for i in range(97, 97 + 26)) - good
 
 pattern = input()
+star_idx = pattern.find('*')
+
+
+def comparison(pattern, string):
+    global good
+
+    for i in range(len(pattern)):
+        if pattern[i] != '?':
+            if string[i] != pattern[i]:
+                return False
+        else:
+            if string[i] not in good:
+                return False
+
+    return True
+
 
 for _ in range(int(input())):
-    st = input()
-    flag = False
-
-    if len(pattern) - int('*' in pattern) > len(st):
-        print('NO')
-    else:
-
-        for i, ch in enumerate(pattern):
-            if ch not in {'?', '*'}:
-                if ch != st[i]:
-                    print('NO')
-                    break
-            elif ch == '?':
-                if st[i] not in good:
-                    print('NO')
-                    break
-            elif ch == '*':
-                flag = True
-                break
-        else:
+    s = input()
+    if star_idx == -1:
+        if len(s) != len(pattern):
+            print('NO')
+        elif comparison(pattern, s):
             print('YES')
-
-        if flag:
-            for j, ch in enumerate(pattern[::-1], start=1):
-                if ch not in {'?', '*'}:
-                    if ch != st[-j]:
-                        print('NO')
-                        break
-                elif ch == '?':
-                    if st[-j] not in good:
-                        print('NO')
-                        break
-                elif ch == '*':
-
-                    if (i - 1) + j > len(st):
-                        print('NO')
-                        break
-                    else:
-                        bad_chs = set(st[i:-(j - 1) + len(st)])
-                        if bad_chs - bad:
-                            print('NO')
-                            break
-                        else:
-                            print('YES')
-                            break
+        else:
+            print('NO')
+    else:
+        if len(pattern) - 1 > len(s):
+            print('NO')
+        elif comparison(pattern[:star_idx], s[:star_idx]) and \
+                comparison(pattern[:star_idx:-1], s[::-1]):
+            if set(s[star_idx:len(s) - (len(pattern) - star_idx - 1)]) - bad:
+                print('NO')
+            else:
+                print('YES')
+        else:
+            print('NO')
